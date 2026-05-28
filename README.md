@@ -1,58 +1,129 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🗳️ Elecciones Presidenciales Colombia 2026
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Plataforma interactiva de predicción, votaciones y análisis estadístico en tiempo real para las elecciones presidenciales de Colombia 2026. Este sistema permite a los ciudadanos simular su voto, consultar las últimas encuestas, informarse con noticias relevantes y analizar tendencias de opinión pública digital de cara a la primera vuelta del 31 de mayo de 2026.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Arquitectura y Tecnologías
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+La aplicación está construida siguiendo las mejores prácticas modernas de desarrollo web:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Backend**: [Laravel 11/12](https://laravel.com/) - API REST segura estructurada en controladores de PHP.
+- **Base de Datos**: [SQLite](https://sqlite.org/) - Almacenamiento rápido y autocontenido para el censo electoral y registros.
+- **Frontend**: Single Page Application (SPA) construida con HTML5 Semántico, CSS3 con diseño personalizado (Glassmorphism + Dark Mode) y Javascript Vanilla (ES6 Modules).
+- **Gráficos Estadísticos**: [Chart.js](https://www.chartjs.org/) - Visualización interactiva y responsiva de votos y tendencias en redes sociales.
+- **Autenticación**: Laravel Sanctum (Tokens de API) e Integración con **Google Identity Services (OAuth)**.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🌟 Características Principales
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 1. Iniciar Sesión / Registro
+- Registro convencional seguro de votantes con cédula de ciudadanía colombiana, departamento y municipio.
+- **Acceso rápido con Google**: Autenticación directa a través del SDK oficial de Google que lee tus cuentas activas del navegador.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+### 2. Simulación de Voto Real
+- Módulo interactivo de votación donde los usuarios pueden emitir un voto secreto por su candidato preferido de forma definitiva (restricción estricta de un voto por usuario).
 
-## Agentic Development
+### 3. Estadísticas y Gráficos Interactivos
+- **Resultados de Votación**: Histograma de votación acumulada en tiempo real.
+- **Tendencias en Redes**: Seguimiento del pulso digital analizando la cantidad de menciones de los candidatos en plataformas clave (Twitter/X, Instagram, TikTok).
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### 4. Candidatos Presidenciales
+- Perfil detallado de los 13 candidatos inscritos en la primera vuelta electoral, incluyendo sus fórmulas vicepresidenciales, biografías completas y principales propuestas de campaña.
 
-```bash
-composer require laravel/boost --dev
+### 5. Encuestas de Opinión
+- Repositorio histórico de las encuestas realizadas por las principales firmas del país (Invamer, Datexco, CNC, Guarumo) con sus respectivos desgloses, muestras estadísticas y márgenes de error.
 
-php artisan boost:install
-```
+### 6. Portal de Noticias
+- Módulo informativo categorizado y filtrable por temas (Política, Encuestas, Debates, Economía, Social).
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 7. Panel de Administración (Admin Panel)
+- Panel de control avanzado para supervisar el proceso:
+  - Visualización del censo de usuarios y control de estado (activo/inactivo).
+  - Monitoreo del registro general de votos por correo y fecha.
+  - Gestión completa de creación/eliminación de noticias y encuestas del sistema.
+  - Moderación y eliminación de comentarios en tiempo real.
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🛠️ Instalación y Configuración Local
 
-## Code of Conduct
+### Requisitos Previos
+- **PHP 8.2** o superior
+- **Composer**
+- **Node.js y npm** (o Bun)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Pasos de Configuración:
 
-## Security Vulnerabilities
+1. **Clonar el proyecto** y situarse en la carpeta raíz:
+   ```bash
+   git clone https://github.com/nicolasgrajaleshoyos/votaciones_precidenciales.git
+   cd elecciones
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+2. **Instalar dependencias del Backend (PHP)**:
+   ```bash
+   composer install
+   ```
 
-## License
+3. **Configurar el archivo de entorno**:
+   Duplica el archivo de ejemplo `.env.example` y nómbralo `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+   *Asegúrate de que la conexión de base de datos sea SQLite:*
+   ```env
+   DB_CONNECTION=sqlite
+   ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+4. **Generar la clave de la aplicación**:
+   ```bash
+   php artisan key:generate
+   ```
+
+5. **Preparar y Sembrar la Base de Datos**:
+   Crea y puebla la base de datos SQLite con los datos iniciales de candidatos, encuestas de mayo de 2026, noticias, administradores y tendencias en redes sociales:
+   ```bash
+   php artisan migrate:fresh --seed
+   ```
+
+6. **Configurar Google Login en tu entorno**:
+   Abre tu archivo `.env` y añade tu clave de cliente OAuth de Google para habilitar el login:
+   ```env
+   GOOGLE_CLIENT_ID=TU_CLIENT_ID_REAL.apps.googleusercontent.com
+   ```
+   *(Asegúrate de que tu Client ID de Google tenga la URI `http://localhost:3000` agregada a los Orígenes de JavaScript Autorizados)*.
+
+7. **Ejecutar el Servidor**:
+   Inicia el servidor local de Laravel en el puerto 3000:
+   ```bash
+   php artisan serve --port=3000
+   ```
+
+8. Abre tu navegador e ingresa a: **`http://localhost:3000`**
+
+---
+
+## 🔒 Credenciales de Prueba (Administrador)
+Para acceder al panel de administración del sistema y realizar pruebas de gestión, utiliza los siguientes datos de acceso:
+- **Correo**: `admin@elecciones2026.co`
+- **Contraseña**: `Admin2026!`
+
+---
+
+## 🌍 Despliegue en Internet (Producción Gratuita)
+
+### Usando Render
+1. Sube este repositorio a tu cuenta de GitHub.
+2. Crea un **Web Service** nuevo en [Render.com](https://render.com/).
+3. Configura:
+   - **Environment**: `PHP`
+   - **Build Command**: `composer install --no-dev && npm install && npm run build`
+   - **Start Command**: `php artisan migrate --force && apache2-foreground`
+4. Añade las variables de entorno en la sección Advanced: `APP_KEY`, `DB_CONNECTION=sqlite`, `DB_DATABASE=database/database.sqlite`, `GOOGLE_CLIENT_ID` y `APP_ENV=production`.
+
+### Usando Fly.io (Recomendado para SQLite persistente)
+1. Instala el CLI de Fly.io.
+2. Ejecuta `fly launch` y sigue las instrucciones para crear el volumen del disco donde persistirá la base de datos `database.sqlite`.
+3. Ejecuta `fly deploy`.
