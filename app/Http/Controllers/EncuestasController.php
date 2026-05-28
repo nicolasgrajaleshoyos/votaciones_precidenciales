@@ -11,6 +11,8 @@ class EncuestasController extends Controller
     // Obtener todas las encuestas
     public function getAll(Request $request)
     {
+        $this->checkAndSimulatePolls();
+
         $tipo = $request->query('tipo');
 
         $query = Encuesta::where('activa', true);
@@ -30,6 +32,86 @@ class EncuestasController extends Controller
         }
 
         return response()->json($encuestas);
+    }
+
+    private function checkAndSimulatePolls()
+    {
+        try {
+            $lastPoll = Encuesta::orderBy('fecha_realizacion', 'desc')->first();
+            if (!$lastPoll || \Carbon\Carbon::parse($lastPoll->fecha_realizacion)->diffInSeconds(now()) > 60 || Encuesta::count() < 8) {
+                $this->simulateNewPoll();
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error simulating polls: ' . $e->getMessage());
+        }
+    }
+
+    private function simulateNewPoll()
+    {
+        if (Encuesta::count() >= 15) {
+            $oldest = Encuesta::orderBy('fecha_realizacion', 'asc')->first();
+            if ($oldest) {
+                $oldest->delete();
+            }
+        }
+
+        $firms = ['Invamer-Gallup', 'Datexco', 'Centro Nacional de Consultoría', 'Guarumo-EcoAnalítica', 'Cifras y Conceptos', 'Yanhaas'];
+        $firm = $firms[array_rand($firms)];
+        
+        $months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo'];
+        $month = $months[array_rand($months)];
+        
+        $title = "Medición de Intención de Voto — " . $firm . " (" . $month . " 2026)";
+        $desc = "Estudio nacional de opinión para la primera vuelta presidencial del 31 de mayo de 2026. Muestra representativa a nivel país.";
+
+        $encuesta = Encuesta::create([
+            'titulo' => $title,
+            'tipo' => 'primera_vuelta',
+            'fuente' => $firm,
+            'fecha_realizacion' => now()->format('Y-m-d'),
+            'margen_error' => number_format(2.2 + (rand(0, 15) / 10), 2),
+            'muestra' => rand(15, 38) * 100,
+            'descripcion' => $desc,
+            'activa' => true
+        ]);
+
+        $candidates = \App\Models\Candidato::all();
+        
+        $weights = [
+            1 => rand(250, 310),
+            2 => rand(160, 210),
+            3 => rand(110, 160),
+            4 => rand(80, 120),
+            5 => rand(90, 130),
+            6 => rand(40, 60),
+            7 => rand(30, 50),
+            8 => rand(25, 45),
+            9 => rand(25, 40),
+            10 => rand(10, 25),
+            11 => rand(20, 35),
+            12 => rand(5, 15),
+            13 => rand(5, 15),
+        ];
+
+        $totalWeight = array_sum($weights);
+        $remaining = 100.0;
+
+        foreach ($candidates as $index => $c) {
+            $w = $weights[$c->id] ?? 10;
+            $percent = round(($w / $totalWeight) * 100, 2);
+            
+            if ($index === count($candidates) - 1) {
+                $percent = round($remaining, 2);
+            } else {
+                $remaining -= $percent;
+            }
+
+            EncuestaResultado::create([
+                'encuesta_id' => $encuesta->id,
+                'candidato_id' => $c->id,
+                'porcentaje' => $percent
+            ]);
+        }
     }
 
     // Obtener una encuesta por ID
