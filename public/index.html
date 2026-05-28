@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Plataforma de predicción y votación electoral Colombia 2026. Consulta encuestas, resultados en tiempo real y predicciones de las elecciones presidenciales.">
+  <title>Elecciones Colombia 2026 | Dashboard Electoral</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-custom fixed-top" id="mainNavbar">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <span class="brand-icon">🗳️</span> Elecciones 2026
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mx-auto">
+          <li class="nav-item"><a class="nav-link active" href="index.html"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="votacion.html"><i class="bi bi-check2-square"></i> Votar</a></li>
+          <li class="nav-item"><a class="nav-link" href="resultados.html"><i class="bi bi-bar-chart-fill"></i> Resultados</a></li>
+          <li class="nav-item"><a class="nav-link" href="prediccion.html"><i class="bi bi-graph-up-arrow"></i> Predicción</a></li>
+          <li class="nav-item"><a class="nav-link" href="encuestas.html"><i class="bi bi-clipboard-data"></i> Encuestas</a></li>
+          <li class="nav-item"><a class="nav-link" href="noticias.html"><i class="bi bi-newspaper"></i> Noticias</a></li>
+        </ul>
+        <div class="nav-auth d-flex align-items-center gap-2" id="navAuth">
+          <!-- Renderizado por JS -->
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- MAIN CONTENT -->
+  <main class="container" style="margin-top: 80px; padding-top: 1rem; position: relative; z-index: 1;">
+    
+    <!-- PAGE HEADER -->
+    <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <h1 class="page-title">
+          <span class="text-gradient">Dashboard Electoral</span>
+        </h1>
+        <p class="page-subtitle">Primera Vuelta Presidencial — 31 de Mayo de 2026</p>
+      </div>
+      <div class="d-flex align-items-center gap-3">
+        <div class="live-indicator">
+          <span class="live-dot"></span> EN VIVO
+        </div>
+        <small class="text-muted" id="lastUpdate">Actualizando...</small>
+      </div>
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="row g-3 mb-4 stagger-children" id="statsRow">
+      <div class="col-6 col-lg-3">
+        <div class="stat-card blue">
+          <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+          <div class="stat-value" id="statTotalVotos">0</div>
+          <div class="stat-label">Total de Votos</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card purple">
+          <div class="stat-icon"><i class="bi bi-person-check-fill"></i></div>
+          <div class="stat-value" id="statCandidatos">13</div>
+          <div class="stat-label">Candidatos</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card green">
+          <div class="stat-icon"><i class="bi bi-clipboard-data-fill"></i></div>
+          <div class="stat-value" id="statEncuestas">0</div>
+          <div class="stat-label">Encuestas</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card gold">
+          <div class="stat-icon"><i class="bi bi-trophy-fill"></i></div>
+          <div class="stat-value" id="statParticipacion">0%</div>
+          <div class="stat-label">Participación</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MÁS OPCIONADO -->
+    <div class="most-likely-banner mb-4 slide-up" id="mostLikelyBanner">
+      <div class="banner-content">
+        <div class="banner-label">⭐ Candidato Más Opcionado a Ganar</div>
+        <div class="banner-name" id="mostLikelyName">Cargando...</div>
+        <div class="banner-prob"><span id="mostLikelyProb">--</span>%</div>
+        <small class="text-muted">Basado en intención de voto, favorabilidad, redes sociales y crecimiento</small>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW -->
+    <div class="row g-3 mb-4">
+      <div class="col-lg-8">
+        <div class="chart-container">
+          <div class="chart-title d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-bar-chart-fill text-accent-blue me-2"></i>Resultados de Votación</span>
+            <small class="text-muted" id="chartVotesTotal"></small>
+          </div>
+          <div style="height: 300px; position: relative;">
+            <canvas id="chartBarVotos"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="chart-container">
+          <div class="chart-title">
+            <i class="bi bi-pie-chart-fill text-accent-purple me-2"></i>Distribución de Votos
+          </div>
+          <div style="height: 300px; position: relative;">
+            <canvas id="chartPieVotos"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RANKING + NEWS -->
+    <div class="row g-3 mb-4">
+      <div class="col-lg-7">
+        <div class="glass-card-static">
+          <h5 class="mb-3"><i class="bi bi-sort-numeric-up text-accent-gold me-2"></i>Ranking de Predicción</h5>
+          <div id="rankingContainer">
+            <div class="text-center py-4"><div class="spinner-custom mx-auto"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="glass-card-static">
+          <h5 class="mb-3"><i class="bi bi-newspaper text-accent-green me-2"></i>Noticias Recientes</h5>
+          <div id="newsContainer">
+            <div class="text-center py-4"><div class="spinner-custom mx-auto"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRENDS CHART -->
+    <div class="row g-3 mb-4">
+      <div class="col-12">
+        <div class="chart-container">
+          <div class="chart-title">
+            <i class="bi bi-graph-up text-accent-cyan me-2"></i>Tendencias en Redes Sociales — Menciones por Candidato
+          </div>
+          <div style="height: 250px; position: relative;">
+            <canvas id="chartTrends"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMMENTS -->
+    <div class="row g-3 mb-4">
+      <div class="col-12">
+        <div class="glass-card-static">
+          <h5 class="mb-3"><i class="bi bi-chat-dots-fill text-accent-pink me-2"></i>Comentarios Políticos</h5>
+          <div id="commentForm" class="mb-3" style="display: none;">
+            <div class="d-flex gap-2">
+              <input type="text" class="form-control form-control-custom flex-grow-1" id="commentInput" placeholder="Escribe tu opinión..." maxlength="500">
+              <button class="btn btn-primary-custom" onclick="submitComment()">
+                <i class="bi bi-send"></i>
+              </button>
+            </div>
+          </div>
+          <div id="commentsContainer">
+            <div class="text-center py-3"><div class="spinner-custom mx-auto"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer-custom">
+    <div class="container">
+      <p class="mb-1">🗳️ <strong>Predicción y Votación Electoral Colombia 2026</strong></p>
+      <p class="mb-0">Plataforma de análisis electoral — Datos simulados con fines demostrativos</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
