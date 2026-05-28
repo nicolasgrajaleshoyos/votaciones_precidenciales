@@ -10,31 +10,48 @@ class NoticiasController extends Controller
     // Obtener todas las noticias
     public function getAll(Request $request)
     {
-        $this->checkAndSimulateNews();
-
         $categoria = $request->query('categoria');
         $limit = $request->query('limit');
 
-        $query = Noticia::query();
+        $realNews = $this->fetchRealRSSNews();
 
-        if ($categoria) {
-            $query->where('categoria', $categoria);
+        if (count($realNews) > 0) {
+            if ($categoria && $categoria !== 'todas') {
+                $realNews = array_values(array_filter($realNews, function($n) use ($categoria) {
+                    return $n['categoria'] === $categoria;
+                }));
+            }
+            if ($limit) {
+                $realNews = array_slice($realNews, 0, intval($limit));
+            }
+            return response()->json($realNews);
         }
 
+        // Fallback a base de datos si falla el lector de noticias reales (RSS)
+        $query = Noticia::query();
+        if ($categoria && $categoria !== 'todas') {
+            $query->where('categoria', $categoria);
+        }
         $query->orderBy('fecha_publicacion', 'desc');
-
         if ($limit) {
             $query->limit(intval($limit));
         }
-
         return response()->json($query->get());
     }
 
     // Obtener destacadas
     public function getDestacadas()
     {
-        $this->checkAndSimulateNews();
+        $realNews = $this->fetchRealRSSNews();
 
+        if (count($realNews) > 0) {
+            $destacadas = array_values(array_filter($realNews, function($n) {
+                return isset($n['destacada']) && $n['destacada'] === true;
+            }));
+            return response()->json(array_slice($destacadas, 0, 5));
+        }
+
+        // Fallback a base de datos si falla el lector de noticias reales (RSS)
         $noticias = Noticia::where('destacada', true)
             ->orderBy('fecha_publicacion', 'desc')
             ->limit(5)
@@ -43,97 +60,84 @@ class NoticiasController extends Controller
         return response()->json($noticias);
     }
 
-    private function checkAndSimulateNews()
+    private function fetchRealRSSNews()
     {
-        try {
-            $lastNews = Noticia::orderBy('fecha_publicacion', 'desc')->first();
-            if (!$lastNews || \Carbon\Carbon::parse($lastNews->fecha_publicacion)->diffInSeconds(now()) > 60 || Noticia::count() < 18) {
-                $this->simulateNewNews();
-            }
-        } catch (\Exception $e) {
-            \Log::error('Error simulating news: ' . $e->getMessage());
-        }
-    }
-
-    private function simulateNewNews()
-    {
-        if (Noticia::count() >= 30) {
-            $oldest = Noticia::orderBy('fecha_publicacion', 'asc')->first();
-            if ($oldest) {
-                $oldest->delete();
-            }
-        }
-
-        $candidatos = [
-            'Iván Cepeda', 'Paloma Valencia', 'Abelardo de la Espriella', 
-            'Sergio Fajardo', 'Claudia López', 'Roy Barreras', 'Carlos Caicedo', 
-            'Luis Gilberto Murillo', 'Mauricio Lizcano', 'Santiago Botero', 
-            'Miguel Uribe Londoño', 'Sondra Macollins', 'Gustavo Matamoros'
+        $feeds = [
+            'El Espectador' => 'https://www.elespectador.com/arc/outboundfeeds/rss/category/politica/?outputType=xml',
+            'El Tiempo' => 'https://www.eltiempo.com/rss/politica.xml'
         ];
 
-        $templates = [
-            [
-                'titulo' => 'CAMP_NAME lidera agenda de propuestas en departamento de DEP_NAME',
-                'contenido' => 'El candidato CAMP_NAME visitó la capital del departamento de DEP_NAME hoy para presentar su visión de gobierno para el periodo 2026-2030. Ante una multitud congregada en la plaza principal, expuso sus compromisos de infraestructura, empleo juvenil y desarrollo de la economía regional. Los líderes del sector privado manifestaron su interés en abrir mesas de diálogo.',
-                'resumen' => 'CAMP_NAME presentó sus propuestas clave de reactivación en DEP_NAME.',
-                'categoria' => 'politica',
-                'fuente' => 'El Espectador',
-                'autor' => 'Corresponsal Regional'
-            ],
-            [
-                'titulo' => 'Debate sobre transición energética: CAMP_NAME defiende su postura',
-                'contenido' => 'Durante un foro organizado por universidades públicas, CAMP_NAME se pronunció sobre el futuro de los recursos minero-energéticos de Colombia. Insistió en que es necesario avanzar con responsabilidad fiscal y social para no afectar las finanzas del país. Sus oponentes criticaron algunos apartes, pero el público elogió la precisión de los datos presentados.',
-                'resumen' => 'El candidato CAMP_NAME debatió sobre la transición ecológica en un foro universitario.',
-                'categoria' => 'debate',
-                'fuente' => 'Portafolio',
-                'autor' => 'Redacción Economía'
-            ],
-            [
-                'titulo' => 'Última encuesta en DEP_NAME muestra repunte de CAMP_NAME',
-                'contenido' => 'Un nuevo estudio de opinión pública en el departamento de DEP_NAME revela un crecimiento notable en la favorabilidad de CAMP_NAME. Las cifras muestran un incremento de 3.5 puntos respecto al mes anterior, consolidándose como una de las opciones más fuertes en esta zona del país. Los analistas locales atribuyen este crecimiento a su reciente gira de propuestas.',
-                'resumen' => 'Favorabilidad de CAMP_NAME registra un repunte de 3.5% en encuestas de DEP_NAME.',
-                'categoria' => 'encuestas',
-                'fuente' => 'Semana',
-                'autor' => 'Diana Rincón'
-            ],
-            [
-                'titulo' => 'CAMP_NAME propone reformas clave para impulsar el desarrollo agrario',
-                'contenido' => 'El candidato presidencial CAMP_NAME lanzó hoy su plan de desarrollo rural integral. El proyecto plantea subsidios directos a pequeños productores, créditos blandos con la banca estatal y la modernización de los canales de distribución nacional de alimentos. Su objetivo es convertir a Colombia en despensa alimentaria de la región.',
-                'resumen' => 'Reforma agraria y subsidios a productores: el plan rural de CAMP_NAME.',
-                'categoria' => 'economia',
-                'fuente' => 'La República',
-                'autor' => 'Carlos Gómez'
-            ],
-            [
-                'titulo' => 'Fuerte debate en redes sociales por las últimas declaraciones de CAMP_NAME',
-                'contenido' => 'Las opiniones compartidas por CAMP_NAME en sus canales digitales generaron miles de comentarios y reacciones encontradas hoy. Militantes y críticos debatieron sobre la viabilidad de sus reformas propuestas en seguridad social y educación. Su equipo de campaña celebró la alta tasa de interacciones y engagement en las plataformas de video.',
-                'resumen' => 'Declaraciones de CAMP_NAME sobre reformas abren debate viral en redes sociales.',
-                'categoria' => 'social',
-                'fuente' => 'La Silla Vacía',
-                'autor' => 'Mateo Silva'
-            ]
-        ];
+        $allNews = [];
+        $idCounter = 9000;
 
-        $departamentos = ['Antioquia', 'Valle del Cauca', 'Atlántico', 'Santander', 'Cundinamarca', 'Bolívar', 'Risaralda', 'Huila', 'Nariño', 'Tolima'];
+        foreach ($feeds as $source => $url) {
+            try {
+                $ctx = stream_context_create([
+                    'http' => ['timeout' => 3, 'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)']
+                ]);
+                $xmlContent = @file_get_contents($url, false, $ctx);
+                if (!$xmlContent) continue;
+                
+                $xml = @simplexml_load_string($xmlContent);
+                if (!$xml || !isset($xml->channel->item)) continue;
 
-        $camp = $candidatos[array_rand($candidatos)];
-        $dep = $departamentos[array_rand($departamentos)];
-        $tpl = $templates[array_rand($templates)];
+                foreach ($xml->channel->item as $item) {
+                    $titulo = (string)$item->title;
+                    $link = (string)$item->link;
+                    $description = strip_tags((string)$item->description);
+                    
+                    if (empty($description)) {
+                        $description = "Noticia de actualidad política colombiana de última hora.";
+                    }
+                    
+                    $pubDate = (string)$item->pubDate;
+                    
+                    $date = now();
+                    try {
+                        $date = \Carbon\Carbon::parse($pubDate)->timezone('America/Bogota');
+                    } catch (\Exception $e) {}
 
-        $titulo = str_replace(['CAMP_NAME', 'DEP_NAME'], [$camp, $dep], $tpl['titulo']);
-        $contenido = str_replace(['CAMP_NAME', 'DEP_NAME'], [$camp, $dep], $tpl['contenido']);
-        $resumen = str_replace(['CAMP_NAME', 'DEP_NAME'], [$camp, $dep], $tpl['resumen']);
+                    $contentLower = mb_strtolower($titulo . ' ' . $description);
+                    $categoria = 'politica';
+                    if (str_contains($contentLower, 'encuesta') || str_contains($contentLower, 'sondeo') || str_contains($contentLower, 'invamer') || str_contains($contentLower, 'datexco') || str_contains($contentLower, 'cnc')) {
+                        $categoria = 'encuestas';
+                    } elseif (str_contains($contentLower, 'debate') || str_contains($contentLower, 'foro') || str_contains($contentLower, 'disputa')) {
+                        $categoria = 'debate';
+                    } elseif (str_contains($contentLower, 'reforma') || str_contains($contentLower, 'dólar') || str_contains($contentLower, 'tasa') || str_contains($contentLower, 'impuesto') || str_contains($contentLower, 'economía') || str_contains($contentLower, 'hacienda')) {
+                        $categoria = 'economia';
+                    } elseif (str_contains($contentLower, 'protesta') || str_contains($contentLower, 'marcha') || str_contains($contentLower, 'social') || str_contains($contentLower, 'salud') || str_contains($contentLower, 'pension') || str_contains($contentLower, 'docente') || str_contains($contentLower, 'sindicato')) {
+                        $categoria = 'social';
+                    }
 
-        Noticia::create([
-            'titulo' => $titulo,
-            'contenido' => $contenido,
-            'resumen' => $resumen,
-            'categoria' => $tpl['categoria'],
-            'fuente' => $tpl['fuente'],
-            'autor' => $tpl['autor'],
-            'destacada' => (rand(0, 10) > 6),
-            'fecha_publicacion' => now()
-        ]);
+                    $allNews[] = [
+                        'id' => $idCounter++,
+                        'titulo' => $titulo,
+                        'contenido' => $description . " Lee la noticia completa en " . $link,
+                        'resumen' => mb_strlen($description) > 180 ? mb_substr($description, 0, 180) . '...' : $description,
+                        'imagen_url' => null,
+                        'fuente' => $source,
+                        'autor' => $source . ' Redacción',
+                        'categoria' => $categoria,
+                        'destacada' => false,
+                        'fecha_publicacion' => $date->toDateTimeString()
+                    ];
+                }
+            } catch (\Exception $e) {
+                \Log::error("Error leyendo feed RSS político: " . $e->getMessage());
+            }
+        }
+
+        if (count($allNews) > 0) {
+            usort($allNews, function($a, $b) {
+                return strtotime($b['fecha_publicacion']) - strtotime($a['fecha_publicacion']);
+            });
+
+            for ($i = 0; $i < min(4, count($allNews)); $i++) {
+                $allNews[$i]['destacada'] = true;
+            }
+        }
+
+        return $allNews;
     }
 
     // Crear noticia (Admin)
