@@ -65,8 +65,17 @@ class PrediccionController extends Controller
             $crecimiento = $c['crecimiento_semanal'];
             $crecimientoNorm = max(0, min(100, ($crecimiento + 10) * 5));
 
-            // Fórmula algoritmo
-            $probabilidad = ($intencionVoto * 0.5) + ($favorabilidad * 0.2) + ($redesScore * 0.2) + ($crecimientoNorm * 0.1);
+            // Fórmula estricta requerida por el usuario
+            // Probabilidad Final = (Encuestas verificadas * 0.60) + (Promedio histórico * 0.15) + (Tendencia semanal * 0.10) + (Favorabilidad * 0.10) + (Redes sociales * 0.05)
+            // Asumiendo IntencionVoto = Encuestas, Historico = simulado, etc.
+            
+            $promedioHistorico = 20.0; // En la vida real sacado del DB de encuestas pasadas
+            
+            $probabilidad = ($intencionVoto * 0.60) + 
+                            ($promedioHistorico * 0.15) + 
+                            ($crecimientoNorm * 0.10) + 
+                            ($favorabilidad * 0.10) + 
+                            ($redesScore * 0.05);
 
             return [
                 'id' => $c['id'],
@@ -82,10 +91,11 @@ class PrediccionController extends Controller
                 'crecimiento_semanal' => $crecimiento,
                 'probabilidad' => round($probabilidad, 2),
                 'desglose' => [
-                    'comp_intencion' => round($intencionVoto * 0.5, 2),
-                    'comp_favorabilidad' => round($favorabilidad * 0.2, 2),
-                    'comp_redes' => round($redesScore * 0.2, 2),
-                    'comp_crecimiento' => round($crecimientoNorm * 0.1, 2)
+                    'comp_encuestas' => round($intencionVoto * 0.60, 2),
+                    'comp_historico' => round($promedioHistorico * 0.15, 2),
+                    'comp_tendencia' => round($crecimientoNorm * 0.10, 2),
+                    'comp_favorabilidad' => round($favorabilidad * 0.10, 2),
+                    'comp_redes' => round($redesScore * 0.05, 2)
                 ]
             ];
         })->sortByDesc('probabilidad')->values();

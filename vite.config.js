@@ -17,6 +17,7 @@ export default defineConfig({
         tailwindcss(),
     ],
     server: {
+        open: 'http://elecciones.test',
         watch: {
             ignored: ['**/storage/framework/views/**'],
         },

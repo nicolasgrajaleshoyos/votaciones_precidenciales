@@ -166,6 +166,13 @@ async function loadDashboardRanking() {
     const container = document.getElementById('rankingContainer');
     if (!container) return;
 
+    if (!data.predicciones || data.predicciones.length === 0) {
+      container.innerHTML = '<div class="text-center py-5 text-muted"><h4>No hay datos verificados</h4><p>A la espera de encuestas y tendencias reales de Colombia 2026.</p></div>';
+      document.getElementById('mostLikelyName').textContent = 'No hay datos verificados';
+      document.getElementById('mostLikelyProb').textContent = '0';
+      return;
+    }
+
     const top5 = data.predicciones.slice(0, 5);
 
     // Update most likely banner
