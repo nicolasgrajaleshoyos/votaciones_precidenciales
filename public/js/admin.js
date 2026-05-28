@@ -103,7 +103,7 @@ async function loadAdminVotes() {
 
 async function loadAdminEncuestas() {
   try {
-    const encuestas = await apiFetch('/encuestas');
+    const encuestas = await apiFetch('/encuestas?activa=all');
     const container = document.getElementById('adminEncuestasContainer');
     
     container.innerHTML = `

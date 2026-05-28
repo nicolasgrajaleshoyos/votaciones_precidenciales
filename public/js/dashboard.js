@@ -45,7 +45,7 @@ async function loadDashboardStats() {
 
     // Load encuestas count
     try {
-      const encuestas = await apiFetch('/encuestas');
+      const encuestas = await apiFetch('/encuestas?activa=true');
       document.getElementById('statEncuestas').textContent = encuestas.length;
     } catch(e) {}
   } catch (err) {

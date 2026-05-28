@@ -21,7 +21,12 @@ class EncuestasController extends Controller
         }
 
         if (!is_null($activa)) {
-            $query->where('activa', filter_var($activa, FILTER_VALIDATE_BOOLEAN));
+            if (strtolower($activa) !== 'all') {
+                $query->where('activa', filter_var($activa, FILTER_VALIDATE_BOOLEAN));
+            }
+        } else {
+            // Por defecto solo mostrar encuestas activas en la app pública
+            $query->where('activa', true);
         }
 
         $encuestas = $query->orderBy('fecha_realizacion', 'desc')->get();

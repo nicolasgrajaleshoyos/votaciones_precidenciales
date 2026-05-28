@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadEncuestas() {
   try {
-    allEncuestas = await apiFetch('/encuestas');
+    allEncuestas = await apiFetch('/encuestas?activa=true');
     renderEncuestas(allEncuestas);
   } catch (err) {
     console.error('Error loading polls:', err);

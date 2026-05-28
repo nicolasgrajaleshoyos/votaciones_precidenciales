@@ -16,7 +16,12 @@ class VotosController extends Controller
             'candidato_id' => 'required|exists:candidatos,id'
         ]);
 
-        $usuario_id = $request->user()->id;
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no autenticado.'], 401);
+        }
+
+        $usuario_id = $user->id;
 
         // Verificar si ya votó
         $existingVote = Voto::where('usuario_id', $usuario_id)->first();
@@ -31,11 +36,16 @@ class VotosController extends Controller
 
         // Registrar voto
         $ip = $request->ip();
-        Voto::create([
-            'usuario_id' => $usuario_id,
-            'candidato_id' => $request->candidato_id,
-            'ip_address' => $ip
-        ]);
+
+        try {
+            Voto::create([
+                'usuario_id' => $usuario_id,
+                'candidato_id' => $request->candidato_id,
+                'ip_address' => $ip
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error registrando el voto: ' . $e->getMessage()], 500);
+        }
 
         return response()->json([
             'message' => 'Voto registrado exitosamente por ' . $candidato->nombre,
@@ -81,7 +91,12 @@ class VotosController extends Controller
     // Verificar si el usuario ya votó
     public function verificarVoto(Request $request)
     {
-        $usuario_id = $request->user()->id;
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no autenticado.'], 401);
+        }
+
+        $usuario_id = $user->id;
 
         $voto = Voto::with('candidato')
             ->where('usuario_id', $usuario_id)
