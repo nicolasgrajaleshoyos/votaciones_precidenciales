@@ -31,15 +31,15 @@ Route::get('/prediccion', [PrediccionController::class, 'getPredicciones']);
 Route::get('/prediccion/historial', [PrediccionController::class, 'getHistorial']);
 
 Route::get('/comentarios', [ComentariosController::class, 'getAll']);
-Route::get('/votos/resultados', [VotosController::class, 'getResultados']);
+Route::get('/resultados', [VotosController::class, 'getResultados']);
 
 
 // --- RUTAS PROTEGIDAS (USUARIOS AUTENTICADOS) ---
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [AuthController::class, 'getProfile']);
     
-    Route::post('/votos/votar', [VotosController::class, 'votar']);
-    Route::get('/votos/verificar', [VotosController::class, 'verificarVoto']);
+    Route::post('/votar', [VotosController::class, 'votar']);
+    Route::get('/mi-voto', [VotosController::class, 'verificarVoto']);
     
     Route::post('/comentarios', [ComentariosController::class, 'create']);
     Route::delete('/comentarios/{id}', [ComentariosController::class, 'delete']);
@@ -58,5 +58,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/stats', [AdminController::class, 'getStats']);
     Route::get('/admin/votos', [AdminController::class, 'getVotos']);
     Route::delete('/admin/votos/{id}', [AdminController::class, 'deleteVoto']);
-    Route::post('/admin/usuarios/{id}/toggle', [AdminController::class, 'toggleUsuario']);
+    Route::put('/admin/usuarios/{id}/toggle', [AdminController::class, 'toggleUsuario']);
 });
